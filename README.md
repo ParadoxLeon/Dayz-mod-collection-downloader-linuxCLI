@@ -8,7 +8,7 @@
 5. Make the script executable by running chmod +x download_mods.sh
 6. Execute the script by running ./download_mods.sh and wait for it to finish
 
-This script will handle downloading mods, renaming them, and extracting the keys while ensuring it only downloads new mods and if they have been updated since the last download. 
+This script will handle downloading mods, renaming them, and extracting the keys, ensuring it only downloads new or updated mods since the last download. 
 
 ## IF the script seems stuck, wait a few minutes before canceling.
 This can happen when the mod file is big.
