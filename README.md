@@ -1,4 +1,4 @@
-# Dayz-mod-downloader-linux
+# Dayz mod collection downloader
 ## How to Use the Script:
 
 1. Create a workshop collection with all the mods you want and make sure it's public
@@ -14,3 +14,6 @@ This script will handle downloading mods, renaming them, and extracting the keys
 This can happen when the mod file is big.
 
 Usually, the script will throw an error when something is wrong.
+
+## Other games
+This script should work with other games too, but you may need to make some adjustments.
