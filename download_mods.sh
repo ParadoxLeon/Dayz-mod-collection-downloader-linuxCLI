@@ -70,7 +70,8 @@ extract_keys() {
     cp -r "$keys_path"/* "$KEYS_DEST_DIR"
 }
 
-# Log in and download all mods
+# Create SteamCMD input
+steamcmd_input=$(mktemp)
 {
     echo "force_install_dir $MODS_DIR"
     echo "login anonymous"
@@ -82,14 +83,20 @@ extract_keys() {
         mod_name=$(echo $mod_details | jq -r '.response.publishedfiledetails[0].title')
         mod_updated=$(echo $mod_details | jq -r '.response.publishedfiledetails[0].time_updated')
 
+        echo "Checking mod: $mod_name (ID: $mod_id, Last Updated: $mod_updated, Current Version: $current_version)" >&2
+
         # Compare versions
         if [ "$mod_updated" != "$current_version" ] || [ "$copy_all_mods" = true ]; then
+            echo "Downloading mod $mod_name (ID: $mod_id)" >&2
             echo "workshop_download_item $GAME_ID $mod_id validate"
-            update_version_file $mod_id $mod_updated
         fi
     done
     echo "quit"
-} | $STEAMCMD_PATH
+} > "$steamcmd_input"
+
+# Execute SteamCMD with the input file
+$STEAMCMD_PATH +runscript "$steamcmd_input"
+rm -f "$steamcmd_input"
 
 # Loop through each mod ID
 for mod_id in $mod_ids; do
@@ -107,15 +114,18 @@ for mod_id in $mod_ids; do
 
     current_version=$(get_current_version $mod_id)
 
+    echo "Processing mod: $mod_name (ID: $mod_id, Last Updated: $mod_updated, Current Version: $current_version)"
+
     # Compare versions
     if [ "$mod_updated" != "$current_version" ] || [ "$copy_all_mods" = true ]; then
-        mod_name_sanitized=$(echo $mod_name)
+        mod_name_sanitized=$(echo "$mod_name")
         new_mod_path="$MODS_DIR/@$mod_name_sanitized"
 
         echo "Copying mod folder from $mod_path to $new_mod_path"
+        rm -rf "$new_mod_path" # remove any previous version
         cp -r "$mod_path" "$new_mod_path"
 
-        echo "Extracting keys for mod ID: $mod_id"
+        echo "Extracting keys for mod ID: $mod_id from $new_mod_path"
         extract_keys "$new_mod_path"
 
         # Update version file
